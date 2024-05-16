@@ -100,10 +100,8 @@ public class Sagan extends Robot {
         drive = new MecanumDrive(this);
         register(drive);
 
-        // locate prop, drop piece, withdraw and straighten out
-        new SequentialCommandGroup(
-
-        ).schedule();
+        // call follow cone
+        new FollowCone(new Pipeline()).schedule();
 
     }
 
