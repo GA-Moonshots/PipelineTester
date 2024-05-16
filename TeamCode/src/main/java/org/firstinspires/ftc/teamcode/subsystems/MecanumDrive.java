@@ -1,52 +1,33 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.robotcore.util.Range;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.teamcode.config.HardwareNames;
-import org.firstinspires.ftc.teamcode.autonomous.RoadRunnerDrive;
-import org.firstinspires.ftc.teamcode.Trabant;
-import org.firstinspires.ftc.teamcode.sensors.Camera;
-import org.firstinspires.ftc.teamcode.sensors.DistanceSensor;
+import org.firstinspires.ftc.teamcode.Sagan;
 
 /**
  * We extend RoadRunner's mecanum drive. That file needs our motor instantiations
  */
-public class MecanumDrive extends RoadRunnerDrive {
+public class MecanumDrive extends SubsystemBase {
 
     // INSTANCE VARIABLES
     private boolean isTargetSet = false;
     private double fieldCentricTarget = 0.0d;
     private boolean isFieldCentric = true;
-    private boolean isGyroLocked = false;
-    private double gyroTarget = 0.0d;
-    // SENSORS
-    public DistanceSensor rearDistance;
-    public DistanceSensor leftDistance;
-    public DistanceSensor rightDistance;
-    public Camera camera;
+
     // USEFUL REFERENCES
-    private final Trabant robot;
+    private final Sagan robot;
     public Telemetry telemetry;
 
-    public MecanumDrive(Trabant robot, Pose2d pose) {
-        // setup the RoadRunner parent class
-        super(robot.opMode.hardwareMap, pose);
+    public MecanumDrive(Sagan robot) {
         // convenience references
         this.robot = robot;
         this.telemetry = robot.opMode.telemetry;
-        // sensors
-        this.camera = new Camera(robot.opMode.hardwareMap, robot.opMode.telemetry);
-        // instantiate distance sensors using our wrapper
-        this.rearDistance = new DistanceSensor(robot.opMode, HardwareNames.REAR_DIST_NAME);
-        this.rightDistance = new DistanceSensor(robot.opMode, HardwareNames.RIGHT_DIST_NAME);
-        this.leftDistance = new DistanceSensor(robot.opMode, HardwareNames.LEFT_DIST_NAME);
+
         this.resetFieldCentricTarget();
     }
 
@@ -71,7 +52,6 @@ public class MecanumDrive extends RoadRunnerDrive {
      * @param turn positive is clockwise
      */
     public void drive(double forward, double strafe, double turn) {
-        localizer.update();
         // Field Centric adjustment
         if (isFieldCentric) {
             // Learn more:

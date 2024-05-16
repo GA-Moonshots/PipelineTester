@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-
-import org.firstinspires.ftc.teamcode.config.HardwareNames;
-import org.firstinspires.ftc.teamcode.Trabant;
-import org.firstinspires.ftc.teamcode.subsystems.DarkDrive;
+import org.firstinspires.ftc.teamcode.Sagan;
+import org.firstinspires.ftc.teamcode.util.HardwareNames;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 
 /**
@@ -14,19 +12,19 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 public class DriveCommand extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final MecanumDrive drive;
-    private GamepadEx player1;
+    private final GamepadEx player1;
 
     /**
      * Store a reference to our robot
      */
-    private final Trabant robot;
+    private final Sagan robot;
 
     /**
      * Establishes our drive command with references and registering our required subsystem
      *
      * @param robot The robot instantiating this drive command
      */
-    public DriveCommand(Trabant robot) {
+    public DriveCommand(Sagan robot) {
         this.robot = robot;
         this.drive = robot.drive;
         player1 = robot.player1;

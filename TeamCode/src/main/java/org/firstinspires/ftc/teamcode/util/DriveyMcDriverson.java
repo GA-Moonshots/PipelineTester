@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import org.firstinspires.ftc.teamcode.Trabant;
-
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.Sagan;
 
 /**
  * The primary operation file for the teleOp phase of the match
@@ -20,7 +20,7 @@ public class DriveyMcDriverson extends CommandOpMode {
          all of our buttons are bound to commands and this class's parent, CommandOpMode, will
          continuously run any scheduled commands. We now slide into the WPILib style.
          */
-        Robot m_robot = new Trabant(this);
+        Robot m_robot = new Sagan(this);
     }
 
 }
