@@ -42,6 +42,7 @@ public class Sagan extends Robot {
 
     public Sagan(LinearOpMode opMode, boolean isRed, boolean isLeft) {
         this.opMode = opMode;
+        imu = opMode.hardwareMap.get(IMU.class, HardwareNames.IMU_NAME);
         initAuto(isRed, isLeft);
     }
 
