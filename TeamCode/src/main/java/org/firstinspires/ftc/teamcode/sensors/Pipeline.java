@@ -14,6 +14,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class Pipeline extends OpenCvPipeline {
         runInference(processedImage);
 
         // Get detection results (bounding boxes and class IDs)
-        List<Rect> boundingBoxes = getBoundingBoxes();
+        List<Rect> boundingBoxes = getBoundingBoxes(processedImage);
         List<Integer> classIds = getClassIds();
 
         // Draw bounding boxes and labels on the original image
@@ -114,37 +115,49 @@ public class Pipeline extends OpenCvPipeline {
      * Note: This is just an example implementation, and you will need to modify it according to your model's
      * output format.
      */
-    private List<Rect> getBoundingBoxes() {
+    private List<Rect> getBoundingBoxes(Mat input) {
         List<Rect> boundingBoxes = new ArrayList<>();
-
-        // Get the output tensor from the interpreter
-        Tensor outputTensor = tfliteInterpreter.getOutputTensor(0);
-
+    
+        // Get the class IDs
+        List<Integer> classIds = getClassIds();
+        int numDetections = classIds.size();
+    
+        // Create an array to hold the output data
+        float[][][] outputData = new float[1][numDetections][numDetections];
+    
+        // Convert the Mat object to a ByteBuffer
+        ByteBuffer inputData = ByteBuffer.allocateDirect(input.rows() * input.cols() * input.channels());
+        input.get(0, 0, inputData.array());
+    
+        // Run the interpreter and fill the output data
+        tfliteInterpreter.run(inputData, outputData);
+    
         // Iterate over the detections
-        for (int i = 0; i < outputTensor[0].length; i++) {
+        for (int i = 0; i < outputData[0].length; i++) {
             // Extract the bounding box coordinates and confidence score
-            float[] detection = outputTensor[0][i][0];
+            float[] detection = outputData[0][i];
             float yMin = detection[0];
             float xMin = detection[1];
             float yMax = detection[2];
             float xMax = detection[3];
             float confidence = detection[5];
-
+    
             // Apply a confidence threshold (e.g., 0.5)
             if (confidence > 0.5) {
                 int left = (int) (xMin * imageWidth);
                 int top = (int) (yMin * imageHeight);
                 int right = (int) (xMax * imageWidth);
                 int bottom = (int) (yMax * imageHeight);
-
+    
                 // Create a Rect object and add it to the list
                 Rect rect = new Rect(left, top, right - left, bottom - top);
                 boundingBoxes.add(rect);
             }
         }
-
+    
         return boundingBoxes;
     }
+    
 
     private List<Integer> getClassIds() {
         // Extract class ID data from the model's output tensor
