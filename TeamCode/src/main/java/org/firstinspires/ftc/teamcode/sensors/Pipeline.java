@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.sensors;
 
-// Import necessary libraries
+import org.firstinspires.ftc.teamcode.Sagan;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Point;
@@ -8,27 +8,48 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.tensorflow.lite.Interpreter;
+import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.firstinspires.ftc.teamcode.util.Constants;
+import org.tensorflow.lite.Tensor;
+
 // Define a class for the ObjectDetectionPipeline
-public class Pipeline extends EasyOpenCvPipeline {
+public class Pipeline extends OpenCvPipeline {
     // Instance variables
     private int imageHeight;
     private int imageWidth;
     // Declare variables for model and labels
     private Interpreter tfliteInterpreter;
     private String[] labels;
+    private Sagan robot;
 
     // Constructor to load the TensorFlow Lite model and labels
-    public ObjectDetectionPipeline(String modelPath, String labelsPath) throws IOException {
+    public Pipeline(Sagan robot) throws IOException {
+        this.robot = robot;
         // Load TensorFlow Lite model from file
-        tfliteInterpreter = new Interpreter(FileUtil.loadEssentiaModel(modelPath));
+        try {
+            tfliteInterpreter = new Interpreter(loadModelFile(Constants.TFLITE));
+        } catch (IOException e) {
+            // do something
+        }
+    }
 
-        // Load labels from file (assuming each line represents a label)
-        labels = FileUtil.readFile(labelsPath).split("\\n");
+    private MappedByteBuffer loadModelFile(String modelName) throws IOException {
+        FileDescriptor fileDescriptor = robot.opMode.hardwareMap.appContext.getAssets().openFd(modelName).getFileDescriptor();
+        InputStream inputStream = new FileInputStream(fileDescriptor);
+        FileChannel fileChannel = ((FileInputStream) inputStream).getChannel();
+        long startOffet = robot.opMode.hardwareMap.appContext.getAssets().openFd(modelName).getStartOffset();
+        long declaredLength = robot.opMode.hardwareMap.appContext.getAssets().openFd(modelName).getDeclaredLength();
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffet, declaredLength);
     }
 
     @Override
@@ -52,7 +73,7 @@ public class Pipeline extends EasyOpenCvPipeline {
 
             // Draw bounding box and label on the image using OpenCV functions
             Imgproc.rectangle(input, box.tl(), box.br(), new Scalar(255, 0, 0), 2);
-            Imgproc.putText(input, label, box.tl(), Core.FONT_HERSHEY_SIMPLEX, 1.0, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(input, label, box.tl(), Imgproc.FONT_HERSHEY_SIMPLEX, 1.0, new Scalar(255, 0, 0), 2);
         }
         return input;
     }
@@ -75,7 +96,7 @@ public class Pipeline extends EasyOpenCvPipeline {
 
     private void runInference(Mat image) {
         // Allocate tensors based on the model's input and output requirements
-        tfliteInterpreter.run(new Object[]{image.toArray()}, null);
+       // tfliteInterpreter.run(new Object[]{image.toArray()}, null);
     }
 
     /**
@@ -97,7 +118,7 @@ public class Pipeline extends EasyOpenCvPipeline {
         List<Rect> boundingBoxes = new ArrayList<>();
 
         // Get the output tensor from the interpreter
-        float[][][][] outputTensor = tfliteInterpreter.getOutputTensor(0);
+        Tensor outputTensor = tfliteInterpreter.getOutputTensor(0);
 
         // Iterate over the detections
         for (int i = 0; i < outputTensor[0].length; i++) {
@@ -129,5 +150,9 @@ public class Pipeline extends EasyOpenCvPipeline {
         // Extract class ID data from the model's output tensor
         // ... (implementation details depend on the model's output format)
         return new ArrayList<>();
+    }
+
+    public Point getObjectLocation(){
+        return null;
     }
 }

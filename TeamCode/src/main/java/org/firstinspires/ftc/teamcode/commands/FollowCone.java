@@ -1,5 +1,14 @@
+package org.firstinspires.ftc.teamcode.commands;
+
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Sagan;
 import org.firstinspires.ftc.teamcode.sensors.Pipeline;
+import org.firstinspires.ftc.teamcode.util.HardwareNames;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -13,28 +22,24 @@ public class FollowCone extends CommandBase {
         this.robot = robot;
         this.pipeline = robot.pipeline;
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        webcam.openCameraDevice();
+        int cameraMonitorViewId = robot.opMode.hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", robot.opMode.hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance()
+                .createWebcam(robot.opMode.hardwareMap.get(WebcamName.class, HardwareNames.WEBCAM_NAME), cameraMonitorViewId);
         webcam.setPipeline(pipeline);
         webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
     @Override
     public void execute() {
-        // Process the image and get the Mat
-        Mat processedImage = pipeline.processImage();
-
-        // Calculate the distance and direction to the cone
-        double distance = calculateDistanceToCone(processedImage);
-        double direction = calculateDirectionToCone(processedImage);
+        Point objLoc = pipeline.getObjectLocation();
 
         // Calculate the speed and direction for the robot to drive
-        double speed = calculateSpeed(distance);
-        double driveDirection = calculateDriveDirection(direction);
+      /*  double speed = calculateSpeed(distance);
+          double driveDirection = calculateDriveDirection(direction);*/
 
         // Drive the robot
-        robot.drive.drive(0, 0, 0 ,0);
+        //robot.drive.drive(0, 0, 0 ,0);
     }
 
     @Override

@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.geometry.Vector2d;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Sagan;
+import org.firstinspires.ftc.teamcode.util.HardwareNames;
 
 /**
  * We extend RoadRunner's mecanum drive. That file needs our motor instantiations
@@ -18,6 +21,15 @@ public class MecanumDrive extends SubsystemBase {
     private boolean isTargetSet = false;
     private double fieldCentricTarget = 0.0d;
     private boolean isFieldCentric = true;
+    private boolean isGyroLocked = false;
+    private double gyroTarget;
+
+    //motors
+    private DcMotorEx leftFront;
+    private DcMotorEx leftBack;
+    private DcMotorEx rightBack;
+    private DcMotorEx rightFront;
+
 
     // USEFUL REFERENCES
     private final Sagan robot;
@@ -27,6 +39,11 @@ public class MecanumDrive extends SubsystemBase {
         // convenience references
         this.robot = robot;
         this.telemetry = robot.opMode.telemetry;
+        leftFront = robot.opMode.hardwareMap.get(DcMotorEx.class, HardwareNames.LEFT_FRONT_NAME);
+        leftBack = robot.opMode.hardwareMap.get(DcMotorEx.class, HardwareNames.LEFT_BACK_NAME);
+        rightBack = robot.opMode.hardwareMap.get(DcMotorEx.class, HardwareNames.RIGHT_BACK_NAME);
+        rightFront = robot.opMode.hardwareMap.get(DcMotorEx.class, HardwareNames.RIGHT_FRONT_NAME);
+
 
         this.resetFieldCentricTarget();
     }
@@ -124,11 +141,7 @@ public class MecanumDrive extends SubsystemBase {
     }
 
     public void stop() {
-        // Create a PoseVelocity2d object representing zero motion:
-        PoseVelocity2d stopMotion = new PoseVelocity2d(new Vector2d(0, 0), 0);
-
-        // Call the setDrivePowers function to apply the zero motion:
-        setDrivePowers(stopMotion);
+        this.drive(0,0,0,0);
     }
 
     /**
@@ -167,7 +180,7 @@ public class MecanumDrive extends SubsystemBase {
      * @return the X angle of the internal IMU in the control panel.
      */
     public double getXAngle() {
-        return imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).firstAngle;
+        return robot.imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).firstAngle;
     }
 
     /**
@@ -175,7 +188,7 @@ public class MecanumDrive extends SubsystemBase {
      * @return the Y angle of the internal IMU in the control panel.
      */
     public double getYAngle() {
-        return imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).secondAngle;
+        return robot.imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).secondAngle;
     }
 
     /**
@@ -183,7 +196,7 @@ public class MecanumDrive extends SubsystemBase {
      * @return the Z angle of the internal IMU in the control panel.
      */
     public double getZAngle() {
-        return imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+        return robot.imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
     }
 
 }

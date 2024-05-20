@@ -7,10 +7,16 @@ import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.commands.FollowCone;
+import org.firstinspires.ftc.teamcode.sensors.Pipeline;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
+import org.firstinspires.ftc.teamcode.util.HardwareNames;
 import org.firstinspires.ftc.teamcode.util.Robot;
+
+import java.io.IOException;
 
 public class Sagan extends Robot {
     // INSTANCE VARIABLES
@@ -21,11 +27,16 @@ public class Sagan extends Robot {
     // SUBSYSTEMS
     public MecanumDrive drive;
 
+    // ASSETS
+    public Pipeline pipeline;
+    public IMU imu;
+
 
     public Sagan(LinearOpMode opMode) {
         this.opMode = opMode;
         player1 = new GamepadEx(opMode.gamepad1);
         player2 = new GamepadEx(opMode.gamepad2);
+        imu = opMode.hardwareMap.get(IMU.class, HardwareNames.IMU_NAME);
         initTele();
     }
 
@@ -101,7 +112,12 @@ public class Sagan extends Robot {
         register(drive);
 
         // call follow cone
-        new FollowCone(new Pipeline()).schedule();
+        try{
+          pipeline = new Pipeline(this);
+        } catch (IOException e) {
+            // TODO: report error on telemetry
+        }
+        new FollowCone(this).schedule();
 
     }
 
